@@ -21,9 +21,7 @@ const replyRules = [
         text: '幫我重開機試試看>>登錄帳號：ipc，密碼：123，選擇重新啟動' },
       {
         type: 'image',
-        originalContentUrl: 'https://i.meee.com.tw/1132UBp.png',
-        previewImageUrl: 'https://i.meee.com.tw/1132UBp.png'
-      }
+        imageUrl: 'https://i.meee.com.tw/1132UBp.png'}
               ]
   },
   {
