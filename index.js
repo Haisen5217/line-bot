@@ -1,3 +1,4 @@
+/*
 const express = require('express');
 const line = require('@line/bot-sdk');
 const { distance } = require('fastest-levenshtein');
@@ -120,7 +121,7 @@ function handleEvent(event) {
 app.listen(process.env.PORT || 3000, () => {
   console.log('伺服器已啟動');
 });
-/*
+*/
 const express = require('express');
 const line = require('@line/bot-sdk');
 
@@ -138,12 +139,17 @@ const app = express();
 // 關鍵字對應表：用陣列存多筆規則，依序比對
 const replyRules = [
   {
-    keywords: ['入金機', '硬幣機', '當機'],
-    type: 'text',
-    text: '幫我重開機試試看>>登錄帳號：ipc，密碼：123，選擇重新啟動'
+    keywords: ['入金機', '掃描器', 'QR', '當機'],
+    messages: [
+      { type: 'text', 
+        text: '幫我重開機試試看>>登錄帳號：ipc，密碼：123，選擇重新啟動' },
+      {
+        type: 'image',
+        imageUrl: 'https://i.meee.com.tw/1132UBp.png'}
+              ]
   },
   {
-    keywords: ['斷線', '暫停服務'],
+    keywords: ['斷線', '中斷', '暫停服務'],
     type: 'text',
     text: '已為您通報機房處理，線上稍後一下！'
   },
@@ -153,9 +159,14 @@ const replyRules = [
     text: process.env.REPAIR_HOTLINE
   },
   {
-    keywords: ['測試', 'TEST'],
+    keywords: ['硬幣機', '硬幣機故障', '通訊失聯'],
     type: 'image',
-    imageUrl: 'https://i.meee.com.tw/kQC1WZ8.png'
+    imageUrl: 'https://i.meee.com.tw/iWAWHkr.png'
+  },
+  {
+    keywords: ['保險箱狀態異常無法存款', '保險箱'],
+    type: 'text',
+    text: '登入畫面輸入8888 >> 帳號:admin >> 密碼:v123 >> 選擇存款流程測試 >> 感應器資料 >> 自我測試 >> 清空幣道 >> 清除錯誤狀態'
   }
 ];
 
@@ -196,7 +207,7 @@ function handleEvent(event) {
     }
   } else {
     // 沒有比對到任何關鍵字時的預設回覆
-    messages = [{ type: 'text', text: '不好意思，我還聽不懂這個問題，可以換個說法嗎？' }];
+    messages = [{ type: 'text', text: '不好意思，我無法判斷這個問題，請稍候...由專人為您服務' }];
   }
 
   return client.replyMessage({
@@ -208,4 +219,3 @@ function handleEvent(event) {
 app.listen(process.env.PORT || 3000, () => {
   console.log('伺服器已啟動');
 });
-*/
