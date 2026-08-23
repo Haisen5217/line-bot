@@ -34,7 +34,7 @@ const replyRules = [
   {
     keywords: ['報修', '專線', '電話', '聯絡方式'],
     type: 'text',
-    text: '報修專線：' & process.env.REPAIR_HOTLINE
+    text: process.env.REPAIR_HOTLINE
   },
   {
     keywords: ['硬幣機', '硬幣機故障', '通訊失聯'],
