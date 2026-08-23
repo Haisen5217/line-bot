@@ -140,13 +140,8 @@ const app = express();
 const replyRules = [
   {
     keywords: ['入金機', '掃描器', 'QR', '當機'],
-    messages: [
-      { type: 'text', 
-        text: '幫我重開機試試看>>登錄帳號：ipc，密碼：123，選擇重新啟動' },
-      {
-        type: 'image',
-        imageUrl: 'https://i.meee.com.tw/1132UBp.png'}
-              ]
+    type: 'image',
+    imageUrl: 'https://i.meee.com.tw/1132UBp.png'
   },
   {
     keywords: ['斷線', '中斷', '暫停服務'],
