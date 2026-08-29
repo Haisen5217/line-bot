@@ -51,10 +51,31 @@ function handleEvent(event) {
   console.log('userId:', event.source.userId); 
   // 暫時加這行，之後可以刪掉
   const userText = event.message.text;
-  // 依序比對每一組規則，看使用者的訊息有沒有包含關鍵字
+  // 特別處理「專人服務」：通知管理員 + 回覆使用者
+  if (userText.includes('專人服務')) {
+    // 推播給管理員
+    client.pushMessage({
+      to: process.env.ADMIN_USER_ID,
+      messages: [
+        {
+          type: 'text',
+          text: `📢 有使用者請求專人服務！\n使用者ID：${event.source.userId}`
+        }
+      ]
+    }).catch((err) => console.error('推播管理員失敗:', err));
+
+    // 回覆使用者
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [{ type: 'text', text: '已通知專人為您服務，請稍候，我們會盡快與您聯繫！' }]
+    });
+  }
+
+  // 原本的關鍵字比對邏輯
   const matchedRule = replyRules.find((rule) =>
     rule.keywords.some((keyword) => userText.includes(keyword))
   );
+
   let messages;
   if (matchedRule) {
     if (matchedRule.type === 'image') {
@@ -69,22 +90,19 @@ function handleEvent(event) {
       messages = [{ type: 'text', text: matchedRule.text }];
     }
   } else {
-    // 沒有比對到任何關鍵字時的預設回覆，附上 Quick Reply 按鈕
     messages = [
       {
         type: 'text',
         text: '不好意思，我無法判斷這個問題，請稍候...由專人為您服務',
         quickReply: {
           items: [
-            {
-              type: 'action',
-              action: { type: 'message', label: '專人服務', text: '專人服務' }
-            }
+            { type: 'action', action: { type: 'message', label: '專人服務', text: '專人服務' } }
           ]
         }
       }
     ];
   }
+
   return client.replyMessage({
     replyToken: event.replyToken,
     messages
