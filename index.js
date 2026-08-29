@@ -48,6 +48,8 @@ function handleEvent(event) {
   if (event.type !== 'message' || event.message.type !== 'text') {
     return Promise.resolve(null);
   }
+  console.log('userId:', event.source.userId); 
+  // 暫時加這行，之後可以刪掉
   const userText = event.message.text;
   // 依序比對每一組規則，看使用者的訊息有沒有包含關鍵字
   const matchedRule = replyRules.find((rule) =>
