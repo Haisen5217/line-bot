@@ -101,7 +101,7 @@ function handleEvent(event) {
     messages = [
       {
         type: 'text',
-        text: '不好意思，我無法判斷這個問題，請稍候...由專人為您服務',
+        text: '不好意思，我無法判斷這個問題，\n請選擇您需要以下哪一個協助 ↓',
         quickReply: {
           items: [
             { type: 'action', action: { type: 'message', label: '入金機當機', text: '入金機當機' } },
