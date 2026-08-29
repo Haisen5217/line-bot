@@ -52,17 +52,25 @@ function handleEvent(event) {
   // 暫時加這行，之後可以刪掉
   const userText = event.message.text;
   // 特別處理「專人服務」：通知管理員 + 回覆使用者
-  if (userText.includes('專人服務')) {
-    // 推播給管理員
-    client.pushMessage({
-      to: process.env.ADMIN_USER_ID,
-      messages: [
-        {
-          type: 'text',
-          text: `📢 有使用者請求專人服務！\n使用者ID：${event.source.userId}`
-        }
-      ]
-    }).catch((err) => console.error('推播管理員失敗:', err));
+ if (userText.includes('專人服務')) {
+    // 把逗號分隔的字串拆成陣列，並過濾掉空白項目
+    const adminIds = process.env.ADMIN_USER_ID
+      .split(',')
+      .map((id) => id.trim())
+      .filter((id) => id.length > 0);
+
+    // 對每一位管理員各推播一次
+    adminIds.forEach((adminId) => {
+      client.pushMessage({
+        to: adminId,
+        messages: [
+          {
+            type: 'text',
+            text: `📢 有使用者請求專人服務！\n使用者ID：${event.source.userId}`
+          }
+        ]
+      }).catch((err) => console.error(`推播給 ${adminId} 失敗:`, err));
+    });
 
     // 回覆使用者
     return client.replyMessage({
@@ -71,7 +79,7 @@ function handleEvent(event) {
     });
   }
 
-  // 原本的關鍵字比對邏輯
+  // 原本的關鍵字比對邏輯（不變）
   const matchedRule = replyRules.find((rule) =>
     rule.keywords.some((keyword) => userText.includes(keyword))
   );
