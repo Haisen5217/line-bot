@@ -104,6 +104,9 @@ function handleEvent(event) {
         text: '不好意思，我無法判斷這個問題，請稍候...由專人為您服務',
         quickReply: {
           items: [
+            { type: 'action', action: { type: 'message', label: '入金機當機', text: '入金機當機' } },
+            { type: 'action', action: { type: 'message', label: '硬幣機故障', text: '硬幣機故障' } },
+            { type: 'action', action: { type: 'message', label: '連線中斷', text: '連線中斷' } },
             { type: 'action', action: { type: 'message', label: '專人服務', text: '專人服務' } }
           ]
         }
