@@ -8,6 +8,8 @@ const client = new line.messagingApi.MessagingApiClient({
   channelAccessToken: config.channelAccessToken
 });
 const app = express();
+// 用來記錄「哪個使用者暫停到什麼時間」，key 是 userId，value 是解除暫停的時間戳記
+const pausedUsers = new Map();
 // 關鍵字對應表：用陣列存多筆規則，依序比對
 const replyRules = [
   {
@@ -50,15 +52,37 @@ function handleEvent(event) {
   }
   console.log('userId:', event.source.userId); 
   // 暫時加這行，之後可以刪掉
-  const userText = event.message.text;
+  const userText = event.message.text.trim();
   // 特別處理「專人服務」：通知管理員 + 回覆使用者
+  const userId = event.source.userId;
+  // 判斷是不是「stop + 數字」的指令，例如 stop300
+  const stopMatch = userText.match(/^stop(\d+)$/i);
+  if (stopMatch) {
+    const seconds = parseInt(stopMatch[1], 10);
+    const resumeAt = Date.now() + seconds * 1000;
+    pausedUsers.set(userId, resumeAt);
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [{ type: 'text', text: `好的，機器人將暫停自動回覆 ${seconds} 秒，時間到會自動恢復。` }]
+    });
+  }
+  // 檢查這個使用者現在是不是還在暫停期間
+  if (pausedUsers.has(userId)) {
+    const resumeAt = pausedUsers.get(userId);
+    if (Date.now() < resumeAt) {
+      // 還在暫停中，不回覆、直接結束
+      return Promise.resolve(null);
+    } else {
+      // 時間已經到了，自動清掉暫停記錄，恢復正常
+      pausedUsers.delete(userId);
+    }
+  }
  if (userText.includes('專人服務')) {
     // 把逗號分隔的字串拆成陣列，並過濾掉空白項目
     const adminIds = process.env.ADMIN_USER_ID
       .split(',')
       .map((id) => id.trim())
       .filter((id) => id.length > 0);
-
     // 對每一位管理員各推播一次
     adminIds.forEach((adminId) => {
       client.pushMessage({
@@ -71,14 +95,12 @@ function handleEvent(event) {
         ]
       }).catch((err) => console.error(`推播給 ${adminId} 失敗:`, err));
     });
-
     // 回覆使用者
     return client.replyMessage({
       replyToken: event.replyToken,
       messages: [{ type: 'text', text: '已通知專人為您服務，請稍候，我們會盡快與您聯繫！' }]
     });
   }
-
   // 原本的關鍵字比對邏輯（不變）
   const matchedRule = replyRules.find((rule) =>
     rule.keywords.some((keyword) => userText.includes(keyword))
