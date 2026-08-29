@@ -33,7 +33,7 @@ const replyRules = [
   {
     keywords: ['保險箱狀態異常無法存款', '保險箱'],
     type: 'text',
-    text: '登入畫面輸入8888 >> \n帳號:admin >> \n密碼:v123 >> \n選擇存款流程測試 >> \n感應器資料 >> \n自我測試 >> \n清空幣道 >> \n清除錯誤狀態'
+    text: '登入畫面輸入8888 >> \n帳號:admin >> \n密碼:v123 >> \n選擇存款流程測試 >> \n選擇感應器資料 >> \n選擇自我測試 >> \n選擇清空幣道 >> \n選擇清除錯誤狀態'
   }
 ];
 app.post('/webhook', line.middleware(config), (req, res) => {
