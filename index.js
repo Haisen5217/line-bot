@@ -63,7 +63,19 @@ function handleEvent(event) {
     pausedUsers.set(userId, resumeAt);
     return client.replyMessage({
       replyToken: event.replyToken,
-      messages: [{ type: 'text', text: `好的，機器人將暫停自動回覆 ${seconds} 秒，時間到會自動恢復。` }]
+      messages: [{ type: 'text', text: `好的，將暫停自動回覆 ${seconds} 秒，時間到會自動恢復。` }]
+    });
+  }
+  // 判斷是不是「start」指令，立刻恢復自動回覆
+  if (/^start$/i.test(userText)) {
+    const wasPaused = pausedUsers.has(userId);
+    pausedUsers.delete(userId);
+    return client.replyMessage({
+      replyToken: event.replyToken,
+      messages: [{
+        type: 'text',
+        text: wasPaused ? '已為您恢復自動回覆！' : '自動回覆本來就是開啟的喔！'
+      }]
     });
   }
   // 檢查這個使用者現在是不是還在暫停期間
