@@ -13,9 +13,14 @@ const pausedUsers = new Map();
 // 關鍵字對應表：用陣列存多筆規則，依序比對
 const replyRules = [
   {
-    keywords: ['入金機', '掃描器', 'QR', '重開機', '當機'],
+    keywords: ['入金機', '掃描器', 'QR', '重開機', '剔退', '當機'],
     type: 'image',
     imageUrl: 'https://i.meee.com.tw/1132UBp.png'
+  },
+  {
+    keywords: ['存款失敗', '卡鈔', '夾鈔', '未入帳'],
+    type: 'text',
+    text: '登入畫面輸入8888 >> \n機器自動復位如果成功 >> \n自動入帳完成 >> 明細單核對金額是否正確 \n機器自動復位如果失敗 >> \n帳號:admin >> \n密碼:v123 >> \n選擇暫存區 >> \n暫存區閘門解鎖 >> \n排除卡鈔 >> \n鎖上暫存區閘門 >> \n選擇存款流程測試 >> \n選擇感應器資料 >> \n選擇自我測試 >> \n選擇清空幣道 >> \n選擇清除錯誤狀態'
   },
   {
     keywords: ['斷線', '中斷', '暫停服務'],
@@ -30,9 +35,14 @@ const replyRules = [
     text: process.env.REPAIR_HOTLINE
   },
   {
-    keywords: ['硬幣機', '硬幣機故障', '重開硬幣機', '通訊失聯'],
+    keywords: [ '硬幣機故障', '重開硬幣機', '通訊失聯'],
     type: 'image',
     imageUrl: 'https://i.meee.com.tw/iWAWHkr.png'
+  },
+  {
+    keywords: ['硬幣機未入帳', '卡幣', '夾幣', '零錢未入帳'],
+    type: 'text',
+    text: '硬幣機塑膠蓋掀開，檢查通道有無卡幣 >> \n確認面板金額 >> \n關閉硬幣機總電源 >> \n重開硬幣機 >> \n手動輸入存入帳號 >> \n手動入帳完成 >> \n明細單核對金額是否正確'
   },
   {
     keywords: ['保險箱狀態異常無法存款', '保險箱'],
