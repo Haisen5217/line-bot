@@ -13,7 +13,7 @@ const pausedUsers = new Map();
 // 關鍵字對應表：用陣列存多筆規則，依序比對
 const replyRules = [
   {
-    keywords: ['入金機', '掃描器', 'QR', '當機'],
+    keywords: ['入金機', '掃描器', 'QR', '重開機', '當機'],
     type: 'image',
     imageUrl: 'https://i.meee.com.tw/1132UBp.png'
   },
@@ -30,7 +30,7 @@ const replyRules = [
     text: process.env.REPAIR_HOTLINE
   },
   {
-    keywords: ['硬幣機', '硬幣機故障', '通訊失聯'],
+    keywords: ['硬幣機', '硬幣機故障', '重開硬幣機', '通訊失聯'],
     type: 'image',
     imageUrl: 'https://i.meee.com.tw/iWAWHkr.png'
   },
