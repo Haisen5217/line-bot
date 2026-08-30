@@ -74,7 +74,7 @@ function handleEvent(event) {
       replyToken: event.replyToken,
       messages: [{
         type: 'text',
-        text: wasPaused ? '已為您恢復自動回覆！' : '自動回覆本來就是開啟的喔！'
+        text: wasPaused ? '已為您恢復自動回覆！' : '自動回覆本來就是開啟的！'
       }]
     });
   }
