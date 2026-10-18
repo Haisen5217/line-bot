@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>設備檢核回報</title>
+<style>
+  :root {
+    --bg: #f3f6f4; --surface: #ffffff; --ink: #1d2b27; --muted: #5d6e68;
+    --line: #cfd9d5; --accent: #1f6f5c; --accent-ink: #ffffff;
+    --ok: #1f6f5c; --err: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141a18; --surface: #1d2623; --ink: #e8f0ed; --muted: #9db0aa;
+      --line: #33423d; --accent: #5cc4a8; --accent-ink: #0d1814;
+      --ok: #5cc4a8; --err: #ff8a80;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px; background: var(--bg); color: var(--ink);
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+    line-height: 1.7;
+  }
+  main { max-width: 600px; margin: 0 auto; }
+  h1 { margin: 0 0 8px; font-size: 1.5rem; line-height: 1.4; }
+  p.hint { margin: 0 0 24px; color: var(--muted); }
+  fieldset {
+    margin: 0 0 16px; padding: 16px 20px 20px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 12px;
+  }
+  fieldset.invalid { border-color: var(--err); }
+  legend { padding: 0 8px; font-weight: 700; font-size: 1.05rem; }
+  .field { margin-top: 12px; }
+  .field > label, .field > .lab { display: block; font-weight: 600; margin-bottom: 6px; }
+  input[type="text"], select {
+    width: 100%; padding: 10px 12px; font: inherit; color: inherit;
+    background: transparent; border: 1px solid var(--line); border-radius: 8px;
+  }
+  select option { color: #1d2b27; background: #ffffff; }
+  .opts { display: flex; gap: 24px; flex-wrap: wrap; }
+  .opts label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  input[type="radio"] { width: 18px; height: 18px; accent-color: var(--accent); }
+  input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  button {
+    font: inherit; font-weight: 600; padding: 12px 28px; border: 0; border-radius: 8px;
+    background: var(--accent); color: var(--accent-ink); cursor: pointer;
+  }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  #status { margin: 16px 0 0; min-height: 1.7em; font-weight: 600; }
+  #status.ok { color: var(--ok); }
+  #status.err { color: var(--err); }
+</style>
+</head>
+<body>
+<main>
+  <h1>設備檢核回報</h1>
+  <p class="hint">請填寫每項設備的序號與狀態，送出後會自動記錄。</p>
+  <form id="f" novalidate>
+    <div id="list"></div>
+    <button type="submit" id="btn">送出回覆</button>
+    <p id="status" role="status" aria-live="polite"></p>
+  </form>
+</main>
+
+<script>
+  // ====== 設定區 ======
+  // 表單網址：把 viewform 換成 formResponse
+  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdWpoTJlazr3ONEc4ApC_UIj5qHwW39KxI9omevQ-LCzkhLwA/formResponse";
+
+  // type: "check" = 序號 + 單選（有檢核／尚未檢核／無備品）
+  //       "qty"   = 只有數量下拉選單 0~5（不含序號）
+  // serial / answer 為 Google 表單對應的欄位代碼（entry.數字）
+  const DEVICES = [
+    { name: "CZ 讀卡機", type: "check", serial: "entry.2020741665", answer: "entry.1535833667" },
+    { name: "CZ 明細機", type: "check", serial: "entry.1418539351", answer: "entry.600750668" },
+    { name: "VS 讀卡機", type: "check", serial: "entry.1951183238", answer: "entry.80383389" },
+    { name: "SR 讀卡機", type: "check", serial: "entry.489888802", answer: "entry.1898106085" },
+    { name: "SR 明細機", type: "check", serial: "entry.961589827", answer: "entry.1414785957" },
+    { name: "DVR", type: "check", serial: "entry.2019851208", answer: "entry.1203399124" },
+    { name: "EPP", type: "qty", answer: "entry.1558437380" }
+  ];
+
+  // 選項文字（必須與 Google 表單中的選項文字完全相同）
+  const OPT_YES  = "有檢核";
+  const OPT_NO   = "尚未檢核";
+  const OPT_NONE = "無備品";
+  const QTY_MAX  = 5;
+
+  // true：每項設備都必填；false：可留空，但填了其中一欄就需完整填寫
+  const REQUIRE_ALL = true;
+  // ====================
+
+  const list = document.getElementById("list");
+  const f = document.getElementById("f");
+  const btn = document.getElementById("btn");
+  const status = document.getElementById("status");
+
+  DEVICES.forEach((d, i) => {
+    const fs = document.createElement("fieldset");
+    let second;
+    if (d.type === "qty") {
+      let opts = '<option value="" selected disabled>請選擇</option>';
+      for (let q = 0; q <= QTY_MAX; q++) opts += `<option value="${q}">${q}</option>`;
+      second = `
+        <div class="field">
+          <label for="a${i}">數量</label>
+          <select id="a${i}">${opts}</select>
+        </div>`;
+    } else {
+      second = `
+        <div class="field">
+          <span class="lab">檢核狀態</span>
+          <div class="opts">
+            <label><input type="radio" name="a${i}" value="${OPT_YES}">${OPT_YES}</label>
+            <label><input type="radio" name="a${i}" value="${OPT_NO}">${OPT_NO}</label>
+            <label><input type="radio" name="a${i}" value="${OPT_NONE}">${OPT_NONE}</label>
+          </div>
+        </div>`;
+    }
+    const serialField = d.type === "qty" ? "" : `
+      <div class="field">
+        <label for="s${i}">序號：</label>
+        <input type="text" id="s${i}" autocomplete="off">
+      </div>`;
+    fs.innerHTML = `<legend>${d.name}</legend>${serialField}${second}`;
+    d.box = fs;
+    list.appendChild(fs);
+  });
+
+  function collect() {
+    return DEVICES.map((d, i) => {
+      const serial = d.type === "qty" ? "" : f.querySelector("#s" + i).value.trim();
+      let answer = "";
+      if (d.type === "qty") {
+        answer = f.querySelector("#a" + i).value;
+      } else {
+        const r = f.querySelector(`input[name="a${i}"]:checked`);
+        answer = r ? r.value : "";
+      }
+      return { d, serial, answer };
+    });
+  }
+
+  // 判斷單一設備是否填寫有誤
+  function isBad({ d, serial, answer }) {
+    const filled = serial !== "" || answer !== "";
+    if (!REQUIRE_ALL && !filled) return false;
+    if (d.type === "qty") return answer === "";                 // 序號選填，數量必選
+    return answer === "" || (serial === "" && answer !== OPT_NONE); // 無備品時序號可留空
+  }
+
+  f.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    status.className = "";
+    const rows = collect();
+    let firstBad = null, anyFilled = false;
+
+    rows.forEach((row) => {
+      if (row.serial !== "" || row.answer !== "") anyFilled = true;
+      const bad = isBad(row);
+      row.d.box.classList.toggle("invalid", bad);
+      if (bad && !firstBad) firstBad = row.d;
+    });
+
+    if (firstBad || !anyFilled) {
+      status.textContent = firstBad
+        ? `請完整填寫「${firstBad.name}」的內容。`
+        : "請至少填寫一項設備。";
+      status.className = "err";
+      if (firstBad) firstBad.box.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    btn.disabled = true;
+    status.textContent = "送出中…";
+    try {
+      const body = new URLSearchParams();
+      rows.forEach(({ d, serial, answer }) => {
+        if (serial !== "") body.append(d.serial, serial);
+        if (answer !== "") body.append(d.answer, answer);
+      });
+      // Google 表單不允許跨網域讀取回應，所以使用 no-cors；請求仍會成功送達
+      await fetch(FORM_URL, { method: "POST", mode: "no-cors", body });
+      status.textContent = "已送出，謝謝你的回覆！";
+      status.className = "ok";
+      f.reset();
+    } catch (err) {
+      status.textContent = "送出失敗，請檢查網路後再試一次。";
+      status.className = "err";
+    } finally {
+      btn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
