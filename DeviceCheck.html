@@ -2,72 +2,187 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>設備檢核回報</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>三商電腦 設備檢核回報</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f3f6f4; --surface: #ffffff; --ink: #1d2b27; --muted: #5d6e68;
-    --line: #cfd9d5; --accent: #1f6f5c; --accent-ink: #ffffff;
-    --ok: #1f6f5c; --err: #b3261e;
+    --bg: #e8eef3;
+    --grid: rgba(15, 92, 140, .08);
+    --head: #12324a;
+    --head-ink: #f2f7fb;
+    --head-muted: #9fb8cb;
+    --paper: #f9fbfc;
+    --field: #ffffff;
+    --ink: #17212b;
+    --muted: #546475;
+    --line: #c3cfda;
+    --brand: #0f5c8c;
+    --brand-ink: #ffffff;
+    --ok: #16794c;   --ok-bg: #dcf2e6;
+    --warn: #8f5400; --warn-bg: #fcebc8;
+    --none: #475260; --none-bg: #e3e7ec;
+    --err: #b3261e;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #141a18; --surface: #1d2623; --ink: #e8f0ed; --muted: #9db0aa;
-      --line: #33423d; --accent: #5cc4a8; --accent-ink: #0d1814;
-      --ok: #5cc4a8; --err: #ff8a80;
+      --bg: #0e151b;
+      --grid: rgba(93, 180, 236, .06);
+      --head: #0a2335;
+      --head-ink: #eaf3fa;
+      --head-muted: #86a3b9;
+      --paper: #16212a;
+      --field: #0f171d;
+      --ink: #e6edf3;
+      --muted: #93a4b3;
+      --line: #2b3a47;
+      --brand: #5db4ec;
+      --brand-ink: #06202f;
+      --ok: #5fd39a;   --ok-bg: #12372a;
+      --warn: #f2b755; --warn-bg: #3a2c0f;
+      --none: #aab4be; --none-bg: #26303a;
+      --err: #ff8a80;
     }
   }
   * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0; padding: 24px; background: var(--bg); color: var(--ink);
+    margin: 0; min-height: 100vh; color: var(--ink); line-height: 1.7;
     font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
-    line-height: 1.7;
+    background-color: var(--bg);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 28px 28px;
   }
-  main { max-width: 600px; margin: 0 auto; }
-  h1 { margin: 0 0 8px; font-size: 1.5rem; line-height: 1.4; }
-  p.hint { margin: 0 0 24px; color: var(--muted); }
-  fieldset {
-    margin: 0 0 16px; padding: 16px 20px 20px; background: var(--surface);
-    border: 1px solid var(--line); border-radius: 12px;
+  .wrap { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+
+  /* 頁首 */
+  header.top { background: var(--head); color: var(--head-ink); }
+  /* 標誌區：標誌為藍色透明底，深色模式也維持白底以保持清晰 */
+  .brand {
+    background: #ffffff; border-bottom: 1px solid #d3dee7;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 0 10px;
   }
-  fieldset.invalid { border-color: var(--err); }
-  legend { padding: 0 8px; font-weight: 700; font-size: 1.05rem; }
+  .logo { display: block; height: 40px; width: auto; }
+  .titlebar { padding-top: 20px; }
+  .top-in { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; padding-bottom: 20px; }
+  h1 { margin: 0; font-size: 1.75rem; line-height: 1.3; font-weight: 700; letter-spacing: .04em; }
+  .top p { margin: 6px 0 0; color: var(--head-muted); font-size: .92rem; }
+  .progress { text-align: right; white-space: nowrap; color: var(--head-muted); font-size: .85rem; line-height: 1.3; }
+  .progress strong { display: block; color: var(--head-ink); font-size: 1.9rem; font-weight: 700; }
+  .bar { height: 4px; background: rgba(255,255,255,.14); }
+  .bar i { display: block; height: 100%; width: 0; background: #5fd39a; transition: width .3s ease; }
+
+  main { padding: 20px 0 8px; }
+
+  /* 各區塊：左側色條表示完成狀態 */
+  .sec {
+    margin: 0 0 14px; padding: 14px 18px 18px;
+    background: var(--paper); border: 1px solid var(--line);
+    border-left: 6px solid var(--line); border-radius: 4px 14px 14px 4px;
+  }
+  .sec.done { border-left-color: var(--ok); }
+  .sec.invalid { border-color: var(--err); border-left-color: var(--err); }
+  .sec-h { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  h2 { margin: 0; font-size: 1.1rem; font-weight: 700; }
+  .badge { font-size: .8rem; font-weight: 500; color: var(--muted); }
+  .badge::before { content: "未填"; }
+  .sec.done .badge { color: var(--ok); font-weight: 700; }
+  .sec.done .badge::before { content: "✓ 已完成"; }
+
   .field { margin-top: 12px; }
-  .field > label, .field > .lab { display: block; font-weight: 600; margin-bottom: 6px; }
+  .field > label, .field > .lab { display: block; margin-bottom: 6px; font-size: .9rem; font-weight: 500; color: var(--muted); }
   input[type="text"], select {
-    width: 100%; padding: 10px 12px; font: inherit; color: inherit;
-    background: transparent; border: 1px solid var(--line); border-radius: 8px;
+    width: 100%; height: 48px; padding: 0 14px; font: inherit; color: var(--ink);
+    background: var(--field); border: 1.5px solid var(--line); border-radius: 10px;
   }
-  select option { color: #1d2b27; background: #ffffff; }
-  .opts { display: flex; gap: 24px; flex-wrap: wrap; }
-  .opts label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-  input[type="radio"] { width: 18px; height: 18px; accent-color: var(--accent); }
-  input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-  button {
-    font: inherit; font-weight: 600; padding: 12px 28px; border: 0; border-radius: 8px;
-    background: var(--accent); color: var(--accent-ink); cursor: pointer;
+  input[type="text"]::placeholder { color: var(--muted); opacity: .7; }
+  select {
+    -webkit-appearance: none; appearance: none; padding-right: 40px;
+    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: calc(100% - 20px) 21px, calc(100% - 14px) 21px;
+    background-size: 6px 6px; background-repeat: no-repeat;
   }
-  button:disabled { opacity: .5; cursor: not-allowed; }
-  #status { margin: 16px 0 0; min-height: 1.7em; font-weight: 600; }
+  select option { color: #17212b; background: #ffffff; }
+  input:focus-visible, select:focus-visible { outline: 3px solid var(--brand); outline-offset: 1px; border-color: var(--brand); }
+
+  /* 檢核狀態：三選一按鈕，選中時依狀態變色 */
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .seg label { position: relative; display: block; cursor: pointer; }
+  .seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .seg span {
+    display: block; padding: 11px 4px; text-align: center; font-weight: 500; font-size: .95rem;
+    background: var(--field); border: 1.5px solid var(--line); border-radius: 10px; color: var(--ink);
+  }
+  .seg input:focus-visible + span { outline: 3px solid var(--brand); outline-offset: 2px; }
+  .seg input:checked + span::before { content: "✓ "; }
+  .seg input:checked + span { font-weight: 700; }
+  .seg .yes  input:checked + span { background: var(--ok-bg);   border-color: var(--ok);   color: var(--ok); }
+  .seg .no   input:checked + span { background: var(--warn-bg); border-color: var(--warn); color: var(--warn); }
+  .seg .none input:checked + span { background: var(--none-bg); border-color: var(--none); color: var(--none); }
+
+  /* 底部送出列 */
+  .actions {
+    position: sticky; bottom: 0; z-index: 5;
+    padding: 28px 0 calc(14px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(to top, var(--bg) 62%, transparent);
+  }
+  #status { margin: 0 0 8px; min-height: 1.7em; font-weight: 700; font-size: .95rem; }
   #status.ok { color: var(--ok); }
   #status.err { color: var(--err); }
+  button {
+    width: 100%; height: 52px; font: inherit; font-size: 1.05rem; font-weight: 700; letter-spacing: .08em;
+    color: var(--brand-ink); background: var(--brand); border: 0; border-radius: 12px; cursor: pointer;
+  }
+  button:hover:not(:disabled) { filter: brightness(1.08); }
+  button:focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+
+  @media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+  @media (max-width: 420px) { h1 { font-size: 1.5rem; } .sec { padding: 12px 14px 16px; } }
 </style>
 </head>
 <body>
-<main>
-  <h1>設備檢核回報</h1>
-  <p class="hint">請填寫每項設備的序號與狀態，送出後會自動記錄。</p>
+<header class="top">
+  <div class="brand">
+    <div class="wrap">
+      <img class="logo" src="data:image/png;base64,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" alt="三商電腦 MDS" width="134" height="40">
+    </div>
+  </div>
+  <div class="titlebar">
+    <div class="wrap">
+      <div class="top-in">
+        <div>
+          <h1>設備檢核回報</h1>
+          <p>三商電腦｜填寫各設備序號與狀態，送出後自動記錄</p>
+        </div>
+        <div class="progress" aria-live="polite"><strong id="pn">0</strong>/<span id="pt">7</span> 項完成</div>
+      </div>
+    </div>
+  </div>
+  <div class="bar"><i id="pbar"></i></div>
+</header>
+
+<main class="wrap">
   <form id="f" novalidate>
-    <fieldset id="ceBox">
-      <legend>員工資料</legend>
+    <section class="sec" id="ceBox">
+      <div class="sec-h"><h2>員工資料</h2></div>
       <div class="field">
         <label for="ce">CE:</label>
-        <input type="text" id="ce" autocomplete="off">
+        <input type="text" id="ce" autocomplete="off" placeholder="請輸入員工編號">
       </div>
-    </fieldset>
+    </section>
+
     <div id="list"></div>
-    <button type="submit" id="btn">送出回覆</button>
-    <p id="status" role="status" aria-live="polite"></p>
+
+    <div class="actions">
+      <p id="status" role="status" aria-live="polite"></p>
+      <button type="submit" id="btn">送出回覆</button>
+    </div>
   </form>
 </main>
 
@@ -100,15 +215,32 @@
 
   // true：每項設備都必填；false：可留空，但填了其中一欄就需完整填寫
   const REQUIRE_ALL = true;
+
+  // 除錯模式：true 時改成在「新分頁」送出，可直接看到 Google 回傳的畫面
+  // 找出問題後請改回 false
+  const DEBUG = false;
   // ====================
 
   const list = document.getElementById("list");
   const f = document.getElementById("f");
   const btn = document.getElementById("btn");
   const status = document.getElementById("status");
+  const ceBox = document.getElementById("ceBox");
+  const ceInput = document.getElementById("ce");
+  const pn = document.getElementById("pn");
+  const pbar = document.getElementById("pbar");
+  document.getElementById("pt").textContent = DEVICES.length;
 
   DEVICES.forEach((d, i) => {
-    const fs = document.createElement("fieldset");
+    const sec = document.createElement("section");
+    sec.className = "sec";
+
+    const serialField = d.type === "qty" ? "" : `
+      <div class="field">
+        <label for="s${i}">序號：</label>
+        <input type="text" id="s${i}" autocomplete="off" placeholder="請輸入序號">
+      </div>`;
+
     let second;
     if (d.type === "qty") {
       let opts = '<option value="" selected disabled>請選擇</option>';
@@ -121,22 +253,18 @@
     } else {
       second = `
         <div class="field">
-          <span class="lab">檢核狀態</span>
-          <div class="opts">
-            <label><input type="radio" name="a${i}" value="${OPT_YES}">${OPT_YES}</label>
-            <label><input type="radio" name="a${i}" value="${OPT_NO}">${OPT_NO}</label>
-            <label><input type="radio" name="a${i}" value="${OPT_NONE}">${OPT_NONE}</label>
+          <span class="lab" id="l${i}">檢核狀態</span>
+          <div class="seg" role="radiogroup" aria-labelledby="l${i}">
+            <label class="yes"><input type="radio" name="a${i}" value="${OPT_YES}"><span>${OPT_YES}</span></label>
+            <label class="no"><input type="radio" name="a${i}" value="${OPT_NO}"><span>${OPT_NO}</span></label>
+            <label class="none"><input type="radio" name="a${i}" value="${OPT_NONE}"><span>${OPT_NONE}</span></label>
           </div>
         </div>`;
     }
-    const serialField = d.type === "qty" ? "" : `
-      <div class="field">
-        <label for="s${i}">序號：</label>
-        <input type="text" id="s${i}" autocomplete="off">
-      </div>`;
-    fs.innerHTML = `<legend>${d.name}</legend>${serialField}${second}`;
-    d.box = fs;
-    list.appendChild(fs);
+
+    sec.innerHTML = `<div class="sec-h"><h2>${d.name}</h2><span class="badge"></span></div>${serialField}${second}`;
+    d.box = sec;
+    list.appendChild(sec);
   });
 
   function collect() {
@@ -157,20 +285,39 @@
   function isBad({ d, serial, answer }) {
     const filled = serial !== "" || answer !== "";
     if (!REQUIRE_ALL && !filled) return false;
-    if (d.type === "qty") return answer === "";                 // 序號選填，數量必選
+    if (d.type === "qty") return answer === "";                     // 數量必選
     return answer === "" || (serial === "" && answer !== OPT_NONE); // 無備品時序號可留空
   }
+
+  // 更新完成狀態（左側色條、進度）
+  function refresh() {
+    let n = 0;
+    collect().forEach((row) => {
+      const filled = row.serial !== "" || row.answer !== "";
+      const bad = isBad(row);
+      const done = filled && !bad;
+      row.d.box.classList.toggle("done", done);
+      if (!bad) row.d.box.classList.remove("invalid");
+      if (done) n++;
+    });
+    const ceFilled = ceInput.value.trim() !== "";
+    ceBox.classList.toggle("done", ceFilled);
+    if (ceFilled) ceBox.classList.remove("invalid");
+    pn.textContent = n;
+    pbar.style.width = (n / DEVICES.length * 100) + "%";
+  }
+  f.addEventListener("input", refresh);
+  f.addEventListener("change", refresh);
 
   f.addEventListener("submit", async (e) => {
     e.preventDefault();
     status.className = "";
-    const ceBox = document.getElementById("ceBox");
-    const ce = document.getElementById("ce").value.trim();
+    const ce = ceInput.value.trim();
     ceBox.classList.toggle("invalid", ce === "");
     if (ce === "") {
       status.textContent = "請先輸入員工編號（CE:）。";
       status.className = "err";
-      document.getElementById("ce").focus();
+      ceInput.focus();
       return;
     }
     const rows = collect();
@@ -201,11 +348,26 @@
         if (serial !== "") body.append(d.serial, serial);
         if (answer !== "") body.append(d.answer, answer);
       });
+      if (DEBUG) {
+        const tmp = document.createElement("form");
+        tmp.method = "POST"; tmp.action = FORM_URL; tmp.target = "_blank"; tmp.style.display = "none";
+        body.forEach((v, k) => {
+          const inp = document.createElement("input");
+          inp.type = "hidden"; inp.name = k; inp.value = v;
+          tmp.appendChild(inp);
+        });
+        document.body.appendChild(tmp); tmp.submit(); tmp.remove();
+        status.textContent = "除錯模式：已在新分頁送出，請查看 Google 回傳的畫面。";
+        status.className = "ok";
+        return;
+      }
       // Google 表單不允許跨網域讀取回應，所以使用 no-cors；請求仍會成功送達
       await fetch(FORM_URL, { method: "POST", mode: "no-cors", body });
       status.textContent = "已送出，謝謝你的回覆！";
       status.className = "ok";
       f.reset();
+      refresh();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err) {
       status.textContent = "送出失敗，請檢查網路後再試一次。";
       status.className = "err";
