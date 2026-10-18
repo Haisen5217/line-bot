@@ -74,22 +74,22 @@
 <script>
   // ====== 設定區 ======
   // 表單網址：把 viewform 換成 formResponse
-  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdC5OufODzH9kjlDTCxhgC0K36qDJRY546a2c-g72Uld7Zafw/formResponse";
+  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdvtYjh76Ugcj2nIVPSQF3OZEXqHF2lg7vj3dYC7VDbM8v09w/formResponse";
 
   // 員工編號（CE:）對應的欄位代碼
-  const EMPLOYEE_ENTRY = "entry.757417146";
+  const EMPLOYEE_ENTRY = "entry.168967522";
 
   // type: "check" = 序號 + 單選（有檢核／尚未檢核／無備品）
   //       "qty"   = 只有數量下拉選單 0~5（不含序號）
   // serial / answer 為 Google 表單對應的欄位代碼（entry.數字）
   const DEVICES = [
-    { name: "CZ 讀卡機", type: "check", serial: "entry.1322039582", answer: "entry.1173893812" },
-    { name: "CZ 明細機", type: "check", serial: "entry.1128160570", answer: "entry.1077012376" },
-    { name: "VS 讀卡機", type: "check", serial: "entry.1291301158", answer: "entry.882779099" },
-    { name: "SR 讀卡機", type: "check", serial: "entry.1624360884", answer: "entry.451923450" },
-    { name: "SR 明細機", type: "check", serial: "entry.551726826", answer: "entry.336322991" },
-    { name: "DVR", type: "check", serial: "entry.328052967", answer: "entry.1685661913" },
-    { name: "EPP", type: "qty", answer: "entry.1713568505" }
+    { name: "CZ 讀卡機", type: "check", serial: "entry.1397087108", answer: "entry.348032795" },
+    { name: "CZ 明細機", type: "check", serial: "entry.1743992472", answer: "entry.64948247" },
+    { name: "VS 讀卡機", type: "check", serial: "entry.258843963", answer: "entry.885322871" },
+    { name: "SR 讀卡機", type: "check", serial: "entry.1346536862", answer: "entry.436912223" },
+    { name: "SR 明細機", type: "check", serial: "entry.1873438707", answer: "entry.162400452" },
+    { name: "DVR", type: "check", serial: "entry.925597810", answer: "entry.1260991549" },
+    { name: "EPP", type: "qty", answer: "entry.1767127710" }
   ];
 
   // 選項文字（必須與 Google 表單中的選項文字完全相同）
