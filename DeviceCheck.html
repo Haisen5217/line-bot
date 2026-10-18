@@ -58,6 +58,13 @@
   <h1>設備檢核回報</h1>
   <p class="hint">請填寫每項設備的序號與狀態，送出後會自動記錄。</p>
   <form id="f" novalidate>
+    <fieldset id="ceBox">
+      <legend>員工資料</legend>
+      <div class="field">
+        <label for="ce">CE:</label>
+        <input type="text" id="ce" autocomplete="off">
+      </div>
+    </fieldset>
     <div id="list"></div>
     <button type="submit" id="btn">送出回覆</button>
     <p id="status" role="status" aria-live="polite"></p>
@@ -67,19 +74,22 @@
 <script>
   // ====== 設定區 ======
   // 表單網址：把 viewform 換成 formResponse
-  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdWpoTJlazr3ONEc4ApC_UIj5qHwW39KxI9omevQ-LCzkhLwA/formResponse";
+  const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSc8KHguuQhs54uBj3N5cqnNLZZNGrlh0htXzcBOXCKQeRGWIA/formResponse";
+
+  // 員工編號（CE:）對應的欄位代碼
+  const EMPLOYEE_ENTRY = "entry.1699260129";
 
   // type: "check" = 序號 + 單選（有檢核／尚未檢核／無備品）
   //       "qty"   = 只有數量下拉選單 0~5（不含序號）
   // serial / answer 為 Google 表單對應的欄位代碼（entry.數字）
   const DEVICES = [
-    { name: "CZ 讀卡機", type: "check", serial: "entry.2020741665", answer: "entry.1535833667" },
-    { name: "CZ 明細機", type: "check", serial: "entry.1418539351", answer: "entry.600750668" },
-    { name: "VS 讀卡機", type: "check", serial: "entry.1951183238", answer: "entry.80383389" },
-    { name: "SR 讀卡機", type: "check", serial: "entry.489888802", answer: "entry.1898106085" },
-    { name: "SR 明細機", type: "check", serial: "entry.961589827", answer: "entry.1414785957" },
-    { name: "DVR", type: "check", serial: "entry.2019851208", answer: "entry.1203399124" },
-    { name: "EPP", type: "qty", answer: "entry.1558437380" }
+    { name: "CZ 讀卡機", type: "check", serial: "entry.240040552", answer: "entry.437764877" },
+    { name: "CZ 明細機", type: "check", serial: "entry.2034551763", answer: "entry.629039337" },
+    { name: "VS 讀卡機", type: "check", serial: "entry.1273484863", answer: "entry.2104748871" },
+    { name: "SR 讀卡機", type: "check", serial: "entry.175138157", answer: "entry.1488134775" },
+    { name: "SR 明細機", type: "check", serial: "entry.713318625", answer: "entry.1740707094" },
+    { name: "DVR", type: "check", serial: "entry.1258472643", answer: "entry.1433562648" },
+    { name: "EPP", type: "qty", answer: "entry.1568122454" }
   ];
 
   // 選項文字（必須與 Google 表單中的選項文字完全相同）
@@ -154,6 +164,15 @@
   f.addEventListener("submit", async (e) => {
     e.preventDefault();
     status.className = "";
+    const ceBox = document.getElementById("ceBox");
+    const ce = document.getElementById("ce").value.trim();
+    ceBox.classList.toggle("invalid", ce === "");
+    if (ce === "") {
+      status.textContent = "請先輸入員工編號（CE:）。";
+      status.className = "err";
+      document.getElementById("ce").focus();
+      return;
+    }
     const rows = collect();
     let firstBad = null, anyFilled = false;
 
@@ -177,6 +196,7 @@
     status.textContent = "送出中…";
     try {
       const body = new URLSearchParams();
+      body.append(EMPLOYEE_ENTRY, ce);
       rows.forEach(({ d, serial, answer }) => {
         if (serial !== "") body.append(d.serial, serial);
         if (answer !== "") body.append(d.answer, answer);
